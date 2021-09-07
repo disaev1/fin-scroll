@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useCallback, useState, useEffect, FormEvent } from 'react';
+import React, { useMemo, useState, useEffect, FormEvent } from 'react';
 import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
@@ -8,7 +8,9 @@ import { List } from 'immutable';
 import './Spendings.scss';
 
 import { Spending } from './Spendings.d'
-import { generateId } from '../utils/helpers';
+import { generateId. getCurrencySymbol } from '../utils/helpers';
+import { currencies } from '../utils/constants';
+import { getTotalOperations } from './Spendings.utils';
 
 interface SpendingCategory {
   id?: string;
@@ -21,24 +23,32 @@ interface SpendingsProps {
   onChange?: (value: Spending[]) => void;
 }
 
+declare namespace CONFIG {
+  defaultCurrency: string;
+}
+
 const sampleSpendings: Spending[] = [
   {
     name: 'Продукты',
     value: 5000,
+    currency: 'RUB',
   },
   {
     name: 'Одежда и обувь',
     value: 2500,
+    currency: 'RUB',
   },
   {
     category: 'Развлечения',
     name: 'Фитнес-клуб',
     value: 14000,
+    currency: 'RUB',
   },
   {
     category: 'Развлечения',
     name: 'Кино',
     value: 250,
+    currency: 'RUB',
   },
   {
     name: 'Курс английского языка',
@@ -67,13 +77,14 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
       )
     ];
 
-    const rawUncategorized = _.filter(data, item => !item.category);
+    const rawUncategorized = _.map(_.filter(data, item => !item.category), item => ({ ...item, id: generateId() }));
 
     setCategorizedSpengings(List(rawCategorized));
     setUncategorizedSpengings(List(rawUncategorized));
   }, [data]);
 
-  const getCurrentSpendings = useCallback(() => {
+
+  const currentSpendings = useMemo(() => {
     const flattenedCategorized = categorizedSpendings.reduce((acc: Spending[], categoryData: SpendingCategory) => {
       acc = acc.concat(categoryData.items);
 
@@ -83,19 +94,24 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
     return [...flattenedCategorized, ...uncategorizedSpendings.toArray()];
   }, [categorizedSpendings, uncategorizedSpendings]);
 
-  useEffect(() => {
-    console.log('categorizedSpendings change:', categorizedSpendings);
-    onChange(getCurrentSpendings());
-  }, [categorizedSpendings, getCurrentSpendings, onChange]);
+  const totalSums = useMemo(() => {
+    return getTotalOperations(currentSpendings);
+  }, [currentSpendings]);
 
   useEffect(() => {
-    console.log('uncategorizedSpendings change:', uncategorizedSpendings);
-    onChange(getCurrentSpendings());
-  }, [uncategorizedSpendings, getCurrentSpendings, onChange]);
+    onChange(currentSpendings);
+  }, [categorizedSpendings, currentSpendings, onChange]);
+
+  useEffect(() => {
+    onChange(currentSpendings);
+  }, [uncategorizedSpendings, currentSpendings, onChange]);
 
   const handleSpendingFieldChange = (spending: Spending, field: string, e: FormEvent): void => {
-    console.log('handleSpendingFieldChange', { spending, field, e });
-    const newValue = (e.target as HTMLSelectElement | HTMLInputElement).value;
+    let newValue: string | number = (e.target as HTMLSelectElement | HTMLInputElement).value;
+
+    if (field === 'value') {
+      newValue = Number(newValue);
+    }
 
 
     if (spending.category) {
@@ -118,7 +134,6 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
       );
     } else {
       const targetIndex = uncategorizedSpendings.findIndex(item => item.category === spending.category && item.name === spending.name);
-      console.log('targetIndex is', targetIndex);
       setUncategorizedSpengings(uncategorizedSpendings.set(targetIndex, { ...spending, [field]: newValue }));
     }
 
@@ -127,7 +142,6 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('handleSubmit', e);
   }
   
   const handleCategoryAdd = () => {
@@ -135,19 +149,9 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
   }
 
   const handleCategorizedItemAdd = (category: string) => {
-    console.log('handleCategorizedItemAdd', { category });
     const targetCategoryIndex = categorizedSpendings.findIndex(item => category === item.category);
-    console.log('targetCategoryIndex', targetCategoryIndex);
 
     if (~targetCategoryIndex) {
-      console.log('new cat spendings', categorizedSpendings.set(
-          targetCategoryIndex,
-          {
-            category,
-            items: categorizedSpendings.get(targetCategoryIndex).items.concat({ name: '', value: 0, category, id: generateId() }),
-          },
-        )
-      );
       setCategorizedSpengings(
         categorizedSpendings.set(
           targetCategoryIndex,
@@ -167,7 +171,6 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
   const handleSpendingDelete = (spending: Spending) => {
     if (spending.category) {
       const targetCategoryIndex = categorizedSpendings.findIndex(item => item.category === spending.category);
-      console.log('handleSpendingDelete', { spending, targetCategoryIndex });
 
       setCategorizedSpengings(
         categorizedSpendings.set(
@@ -247,9 +250,7 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
             </div>
             <div className="td pa2">
               <Form.Select defaultValue={spending.currency || 'RUB'} onChange={e => handleSpendingFieldChange(spending, 'currency', e)} required>
-                <option value="RUB">₽</option>
-                <option value="USD">$</option>
-                <option value="EUR">€</option>
+                {currencies.map(currency => <option value={currency} key={currency}>{getCurrencySymbol(currency)}</option>)}
               </Form.Select>
             </div>
             <div className="td pa2">
@@ -259,7 +260,12 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
             </div>
           </div>
         )}
-        <Button type="submit" variant="danger">Угу</Button>
+        {totalSums.map((item, index) =>
+          <div className="tr">
+            <div className="td b pa2">{index === 0 ? 'Всего' : ''}</div>
+            <div className="td pa2">{item.value} {getCurrencySymbol(item.currency)}</div>
+          </div>
+        )}
       </Form>
     </div>
   );
