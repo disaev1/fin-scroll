@@ -1,4 +1,5 @@
 const express  = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 
@@ -8,6 +9,7 @@ const PeriodModel = mongoose.model('periods', schema);
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 app.get('/', (req, res) => {
   res.send('Root OK!');
@@ -16,6 +18,7 @@ app.get('/', (req, res) => {
 app.get('/periods', async (req, res) => {
   
   const result = await PeriodModel.find();
+  console.log('result is', result);
 
   res.header('Content-Type', 'application/json');
   res.send(result);

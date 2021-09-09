@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useMemo, useState, useEffect, FormEvent } from 'react';
+import React, { useMemo, useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
@@ -8,7 +8,7 @@ import { List } from 'immutable';
 import './Spendings.scss';
 
 import { Spending } from './Spendings.d'
-import { generateId. getCurrencySymbol } from '../utils/helpers';
+import { generateId, getCurrencySymbol } from '../utils/helpers';
 import { currencies } from '../utils/constants';
 import { getTotalOperations } from './Spendings.utils';
 
@@ -23,43 +23,7 @@ interface SpendingsProps {
   onChange?: (value: Spending[]) => void;
 }
 
-declare namespace CONFIG {
-  defaultCurrency: string;
-}
-
-const sampleSpendings: Spending[] = [
-  {
-    name: 'Продукты',
-    value: 5000,
-    currency: 'RUB',
-  },
-  {
-    name: 'Одежда и обувь',
-    value: 2500,
-    currency: 'RUB',
-  },
-  {
-    category: 'Развлечения',
-    name: 'Фитнес-клуб',
-    value: 14000,
-    currency: 'RUB',
-  },
-  {
-    category: 'Развлечения',
-    name: 'Кино',
-    value: 250,
-    currency: 'RUB',
-  },
-  {
-    name: 'Курс английского языка',
-    value: 500,
-    currency: 'USD',
-  }
-];
-
 const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
-  data = sampleSpendings;
-
   const [categorizedSpendings, setCategorizedSpengings] = useState<List<SpendingCategory>>(List([]));
   const [uncategorizedSpendings, setUncategorizedSpengings] = useState<List<Spending>>(List([]));
 
@@ -136,13 +100,7 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
       const targetIndex = uncategorizedSpendings.findIndex(item => item.category === spending.category && item.name === spending.name);
       setUncategorizedSpengings(uncategorizedSpendings.set(targetIndex, { ...spending, [field]: newValue }));
     }
-
-    
   };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  }
   
   const handleCategoryAdd = () => {
     setCategorizedSpengings(categorizedSpendings.unshift({ category: '', items: [], id: generateId() }));
@@ -187,86 +145,86 @@ const Spendings = ({ data, onChange }: SpendingsProps): JSX.Element => {
     }
   };
 
-  const handleCategoryNameChange = (categoryData: SpendingCategory, e: FormEvent<HTMLInputElement>) => {
+  const handleCategoryNameChange = (categoryData: SpendingCategory, e: ChangeEvent) => {
     const newValue = (e.target as HTMLInputElement).value;
     const targetCategoryIndex = categorizedSpendings.findIndex(item => item.id === categoryData.id);
 
     setCategorizedSpengings(
-        categorizedSpendings.set(
-          targetCategoryIndex,
-          {
-            category: newValue,
-            items: categorizedSpendings.get(targetCategoryIndex).items.map(item => ({ ...item, category: newValue }))
-          },
-          
-        )
-      );
+      categorizedSpendings.set(
+        targetCategoryIndex,
+        {
+          category: newValue,
+          items: categorizedSpendings.get(targetCategoryIndex).items.map(item => ({ ...item, category: newValue }))
+        },
+        
+      )
+    );
   };
 
   return (
     <div>
-      <Button variant="primary" className="mr2" onClick={handleCategoryAdd}>Добавить категорию</Button>
-      <Button variant="primary" onClick={handleUncategorizedItemAdd}>Добавить расход</Button>
-      <Form onSubmit={handleSubmit}>
-        {categorizedSpendings.map(item =>
-          <div key={item.id}>
-            <FormControl placeholder="Категория" defaultValue={item.category} onChange={e => handleCategoryNameChange(item, e)} />
-            <div className="Spendings__categorizedSpendings">
-              <div className="pa2">
-                <Button variant="primary" onClick={() => handleCategorizedItemAdd(item.category)}>Добавить расход</Button>
-              </div>
-              {item.items.map(spending => 
-                <div className="tr" key={spending.id}>
-                  <div className="td pa2">
-                    <FormControl placeholder="Название" defaultValue={spending.name} required onChange={e => handleSpendingFieldChange(spending, 'name', e)} />
-                  </div>
-                  <div className="td pa2">
-                    <FormControl placeholder="Сумма" type="numeric" defaultValue={spending.value} required onChange={e => handleSpendingFieldChange(spending, 'value', e)} />
-                  </div>
-                  <div className="td pa2">
-                    <Form.Select defaultValue={spending.currency || 'RUB'} onChange={e => handleSpendingFieldChange(spending, 'currency', e)} required>
-                      <option value="RUB">₽</option>
-                      <option value="USD">$</option>
-                      <option value="EUR">€</option>
-                    </Form.Select>
-                  </div>
-                  <div className="td pa2">
-                    <div className="pointer" onClick={() => handleSpendingDelete(spending)} >
-                      <i className="fas fa-times" />
-                    </div>
+      <div className="flex mb2">
+        <Button variant="primary" className="mr1" onClick={handleCategoryAdd}>Добавить категорию</Button>
+        <Button variant="primary" onClick={handleUncategorizedItemAdd}>Добавить расход</Button>
+      </div>
+      {categorizedSpendings.map(item =>
+        <div key={item.id}>
+          <FormControl placeholder="Категория" defaultValue={item.category} onChange={e => handleCategoryNameChange(item, e)} />
+          <div className="Spendings__categorizedSpendings">
+            <div className="pa2">
+              <Button variant="primary" onClick={() => handleCategorizedItemAdd(item.category)}>Добавить расход</Button>
+            </div>
+            {item.items.map(spending => 
+              <div className="tr" key={spending.id}>
+                <div className="td pa2">
+                  <FormControl placeholder="Название" defaultValue={spending.name} required onChange={e => handleSpendingFieldChange(spending, 'name', e)} />
+                </div>
+                <div className="td pa2">
+                  <FormControl placeholder="Сумма" type="numeric" defaultValue={spending.value} required onChange={e => handleSpendingFieldChange(spending, 'value', e)} />
+                </div>
+                <div className="td pa2">
+                  <Form.Select defaultValue={spending.currency || 'RUB'} onChange={e => handleSpendingFieldChange(spending, 'currency', e)} required>
+                    <option value="RUB">₽</option>
+                    <option value="USD">$</option>
+                    <option value="EUR">€</option>
+                  </Form.Select>
+                </div>
+                <div className="td pa2">
+                  <div className="pointer" onClick={() => handleSpendingDelete(spending)} >
+                    <i className="fas fa-times" />
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
-        {uncategorizedSpendings.map(spending =>
-          <div className="tr" key={spending.id}>
-            <div className="td pa2">
-              <FormControl placeholder="Название" defaultValue={spending.name} required onChange={e => handleSpendingFieldChange(spending, 'name', e)} />
-            </div>
-            <div className="td pa2">
-              <FormControl placeholder="Сумма" defaultValue={spending.value} required onChange={e => handleSpendingFieldChange(spending, 'value', e)} />
-            </div>
-            <div className="td pa2">
-              <Form.Select defaultValue={spending.currency || 'RUB'} onChange={e => handleSpendingFieldChange(spending, 'currency', e)} required>
-                {currencies.map(currency => <option value={currency} key={currency}>{getCurrencySymbol(currency)}</option>)}
-              </Form.Select>
-            </div>
-            <div className="td pa2">
-              <div className="pointer" onClick={() => handleSpendingDelete(spending)} >
-                <i className="fas fa-times" />
               </div>
+            )}
+          </div>
+        </div>
+      )}
+      {uncategorizedSpendings.map(spending =>
+        <div className="tr" key={spending.id}>
+          <div className="td pa2">
+            <FormControl placeholder="Название" defaultValue={spending.name} required onChange={e => handleSpendingFieldChange(spending, 'name', e)} />
+          </div>
+          <div className="td pa2">
+            <FormControl placeholder="Сумма" defaultValue={spending.value} required onChange={e => handleSpendingFieldChange(spending, 'value', e)} />
+          </div>
+          <div className="td pa2">
+            <Form.Select defaultValue={spending.currency || 'RUB'} onChange={e => handleSpendingFieldChange(spending, 'currency', e)} required>
+              {currencies.map(currency => <option value={currency} key={currency}>{getCurrencySymbol(currency)}</option>)}
+            </Form.Select>
+          </div>
+          <div className="td pa2">
+            <div className="pointer" onClick={() => handleSpendingDelete(spending)} >
+              <i className="fas fa-times" />
             </div>
           </div>
-        )}
-        {totalSums.map((item, index) =>
-          <div className="tr">
-            <div className="td b pa2">{index === 0 ? 'Всего' : ''}</div>
-            <div className="td pa2">{item.value} {getCurrencySymbol(item.currency)}</div>
-          </div>
-        )}
-      </Form>
+        </div>
+      )}
+      {totalSums.map((item, index) =>
+        <div className="tr">
+          <div className="td b pa2">{index === 0 ? 'Всего' : ''}</div>
+          <div className="td pa2">{item.value} {getCurrencySymbol(item.currency)}</div>
+        </div>
+      )}
     </div>
   );
 };

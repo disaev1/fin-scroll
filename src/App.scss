@@ -5,9 +5,13 @@ body {
   margin: 0;
 }
 
+@font-face {
+  font-family: Ubuntu;
+  src: url('../assets/Ubuntu-Regular.ttf') format('ttf');
+}
+
 .App {
-  font-family: Arial, Helvetica, sans-serif;
-  background: lightblue;
+  font-family: Ubuntu, Arial, Helvetica, sans-serif;
   color: $darkGray;
   min-height: 100vh;
 
@@ -87,8 +91,8 @@ body {
   padding: .5rem;
 }
 
-.pl3 {
-  padding: 1rem;
+.pl4 {
+  padding-left: 1.5rem;
 }
 
 .tc {

@@ -36,7 +36,7 @@ const SIDifference = ({ spendings, incomes }: SIDifferenceProps): JSX.Element =>
   return (
     <div>
       {diffs.map((item, index) =>
-        <div className="tr">
+        <div className="tr" key={item.currency}>
           <div className="td b pa2">{index === 0 ? 'Всего' : ''}</div>
           <div className="td pa2">{item.value} {getCurrencySymbol(item.currency)}</div>
         </div>
