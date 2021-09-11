@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const _ = require('lodash');
 
 mongoose.connect('mongodb://localhost:27017/local');
-const schema = new mongoose.Schema({ spendings: Array, incomes: Array, after: Array, previous: mongoose.ObjectId });
+const schema = new mongoose.Schema({ spendings: Array, incomes: Array, after: Object, previous: mongoose.ObjectId }, );
 const PeriodModel = mongoose.model('periods', schema);
 
 const app = express();
@@ -21,21 +21,30 @@ app.get('/periods', async (req, res) => {
   console.log('result is', result);
 
   res.header('Content-Type', 'application/json');
-  res.send(result);
+  res.send(result.map(item => _.omit(item, '__v')));
 });
 
 app.post('/periods', async (req, res) => {
-  console.log('body is', req.body.data, typeof req.body.data);
-  const newPeriod = new PeriodModel({ ...req.body.data, previous: mongoose.Types.ObjectId(req.body.data.previous) });
+  const allPeriods = await PeriodModel.find();
 
-  await newPeriod.save();
+  const prevs = allPeriods.map(period => period.previous ? period.previous.toString() : null);
+  console.log('prevs', prevs);
+  const lastPeriod = allPeriods.find(period => !prevs.includes(period._id.toString()));
+  console.log('body is', req.body, typeof req.body);
+  const newPeriod = new PeriodModel({ ...req.body, previous: lastPeriod ? lastPeriod._id : null });
 
-  res.send('OK!');
+  const savedPeriod = await newPeriod.save();
+  const previousPeriod = await PeriodModel.findById(savedPeriod.previous);
+  console.log({ savedPeriod: savedPeriod.toJSON(), previousPeriod: previousPeriod.toJSON() });
+
+  res.send(_.omit({ ...savedPeriod.toJSON(), before: previousPeriod.toJSON().after }, '__v'));
 
 });
 
 app.patch('/periods/:id', async (req, res) => {
-  const result = PeriodModel.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) }, req.body.data);
+  console.log('req.params are', req.params);
+  const result = await PeriodModel.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) }, req.body);
+  console.log('result is', result);
 
   res.send(_.pick(result, ['n', 'nModified']));
 });
