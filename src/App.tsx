@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route, Link, useHistory } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/js/all.js';
 
@@ -18,7 +19,6 @@ const AppWrapper = (): JSX.Element => {
 }
 
 const App = (): JSX.Element => {
-  
   const [editedPeriod, setEditedPeriod] = useState<Period>(null);
   const history = useHistory();
   console.log('history is', history);
@@ -28,6 +28,10 @@ const App = (): JSX.Element => {
     setEditedPeriod(period);
     history.push('/periods/one');
   };
+
+  useEffect(() => {
+    console.log('editedPeriod changed to', editedPeriod);
+  }, [editedPeriod]);
 
   return (
     <div className="App">

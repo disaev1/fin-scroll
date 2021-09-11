@@ -11,6 +11,7 @@ interface Period {
   before: State,
   after: State,
   previous: string;
+  _id: string;
 }
 
 export { Period };

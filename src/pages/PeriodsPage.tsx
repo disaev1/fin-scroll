@@ -2,9 +2,13 @@ import axios from 'axios';
 
 import React, { useState, useEffect } from 'react';
 
+import { apiRoot } from '../utils/constants';
+
 import Button from 'react-bootstrap/Button';
+import Accordion from 'react-bootstrap/Accordion';
 
 import { Period } from './PeriodsPage.d';
+import PeriodCard from '../components/PeriodCard';
 
 interface PeriodPageProps {
   onPeriodEdit: (period: Period) => void;
@@ -25,22 +29,38 @@ const PeriodsPage = ({ onPeriodEdit }: PeriodPageProps): JSX.Element => {
     getPeriods();
   }, []);
 
-  const handleAddFirstPeriod = () => {
-    const firstPeriod: Period = {
-      spendings: [], incomes: [], before: { items: [], date: '' }, after: { items: [], date: '' }, previous: null
-    };
+  const handleAddFirstPeriod = async () => {
+    const { data } = await axios.post(`${apiRoot}/periods`, {
+      spendings: [], incomes: [], after: { items: [], date: '' }
+    });
+    const firstPeriod: Period = data as Period;
 
     onPeriodEdit(firstPeriod);
   };
 
+  const handleAddPeriod = async () => {
+    const { data } = await axios.post(`${apiRoot}/periods`, {
+      spendings: [], incomes: [], after: { items: [], date: '' }
+    });
+    console.log('handleAddPeriod', data);
+
+    onPeriodEdit(data as Period);
+  }
+
   return (
     <div className="Periods">
+      <h2 className="tc mb3">Периоды</h2>
       {loaded
       ? <>
-          {!periods.length
-          ? <Button variant="success" onClick={handleAddFirstPeriod}>Добавить первый период</Button>
-          : null
-          }
+          <div className="mb2">
+            {!periods.length
+            ? <Button variant="success" onClick={handleAddFirstPeriod}>Добавить первый период</Button>
+            : <Button variant="success" onClick={handleAddPeriod}>Добавить период</Button>
+            }
+          </div>
+          <Accordion>
+            {periods.map((period, index) => <PeriodCard period={period} index={index} />)}
+          </Accordion>
         </>
       : null}
     </div>

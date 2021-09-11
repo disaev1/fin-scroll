@@ -7,9 +7,10 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 
-import { generateId, getCurrencySymbol } from '../utils/helpers';
+import { generateId, getCurrencySymbol } from '~/utils/helpers';
 
-import { Spending } from './Spendings.d';
+import { Spending } from '../Spendings.d';
+import { BeforeAfter } from './index.d';
 
 const defaultCurrency = 'RUB';
 
@@ -17,16 +18,6 @@ interface StateEditProps {
   before: Spending[];
   after: Spending[];
   onChange?: (value: { before: Spending[], after: Spending[] }) => void;
-}
-
-interface BeforeAfter {
-  name: string;
-  category?: string;
-  id: string;
-  before?: number;
-  after?: number;
-  currency: string;
-  isNew?: boolean;
 }
 
 interface BeforeAfterCategory {

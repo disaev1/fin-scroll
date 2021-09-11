@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 
 import './Spendings.scss';
@@ -15,32 +15,6 @@ interface SpendingsProps {
   data: Spending[];
 }
 
-const sampleSpendings: Spending[] = [
-  {
-    name: 'Продукты',
-    value: 5000,
-  },
-  {
-    name: 'Одежда и обувь',
-    value: 2500,
-  },
-  {
-    category: 'Развлечения',
-    name: 'Фитнес-клуб',
-    value: 14000,
-  },
-  {
-    category: 'Развлечения',
-    name: 'Кино',
-    value: 250,
-  },
-  {
-    name: 'Курс английского языка',
-    value: 500,
-    currency: 'USD',
-  }
-];
-
 const getDisplayCurrency = (currency: string): string => {
   if (!currency) {
     return '₽';
@@ -52,8 +26,6 @@ const getDisplayCurrency = (currency: string): string => {
 };
 
 const Spendings = ({ data }: SpendingsProps): JSX.Element => {
-  data = sampleSpendings;
-
   const categorizedSpendings = useMemo(() => {
     const grouped = _.omit(_.groupBy(data, item => item.category || 'undefined'), 'undefined');
     return [..._.flatMap(grouped, (items, category) => ({ category, items }))];
