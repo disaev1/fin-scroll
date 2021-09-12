@@ -4,13 +4,14 @@ import { Map } from 'immutable';
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 
 import { generateId, getCurrencySymbol } from '~/utils/helpers';
 
 import { Spending } from '../Spendings.d';
 import { BeforeAfter } from './index.d';
+
+import StateItem from './elements/StateItem';
 
 const defaultCurrency = 'RUB';
 
@@ -90,6 +91,7 @@ const StateEdit = ({ before, after, onChange }: StateEditProps): JSX.Element => 
     );
   };
 
+
   const handleUncategorizedItemAdd = () => {
     const uncategorized = tableData.get('uncategorized') as BeforeAfter[];
 
@@ -107,44 +109,33 @@ const StateEdit = ({ before, after, onChange }: StateEditProps): JSX.Element => 
     );
   };
 
-  const getDifference = (item: BeforeAfter): number => {
-    return _.get(item, 'after', 0) - _.get(item, 'before', 0);
-  }
 
-  const handleStateItemFieldChange = (stateItem: BeforeAfter, field: string, e: FormEvent): void => {
-    console.log('handleStateItemFieldChange', { stateItem, field, e });
-    let newValue: string | number = (e.target as HTMLSelectElement | HTMLInputElement).value;
-
-    if (['before', 'after'].includes(field)) {
-      newValue = Number(newValue);
-    }
-
-
-    if (stateItem.category) {
+  const handleItemChange = (newItem: BeforeAfter) => {
+    if (newItem.category) {
       const categorized = tableData.get('categorized') as BeforeAfterCategory[];
-      const targetCategoryIndex = categorized.findIndex(item => item.category === stateItem.category);
+      const targetCategoryIndex = categorized.findIndex(item => item.category === newItem.category);
       const targetCategoryItems = categorized[targetCategoryIndex].items;
-      const targetItemIndex = targetCategoryItems.findIndex(item => item.id === stateItem.id);
-      console.log('targetCategoryItems', targetCategoryItems);
+      const targetItemIndex = targetCategoryItems.findIndex(item => item.id === newItem.id);
 
       setTableData(
         tableData.setIn(
           ['categorized', targetCategoryIndex, 'items', targetItemIndex],
-          { ...stateItem, [field]: newValue }
+          newItem,
         ),
       );
     } else {
       const uncategorized = tableData.get('uncategorized') as BeforeAfter[];
 
       const targetIndex = uncategorized.findIndex(
-        item => item.category === stateItem.category && item.name === stateItem.name
+        item => item.category === newItem.category && item.name === newItem.name
       );
 
       setTableData(
-        tableData.setIn(['uncategorized', targetIndex], { ...stateItem, [field]: newValue })
+        tableData.setIn(['uncategorized', targetIndex], newItem),
       );
     }
   };
+  
 
   const handleCategoryNameChange = (categoryData: BeforeAfterCategory, e: FormEvent) => {
     const newValue = (e.target as HTMLInputElement).value;
@@ -294,7 +285,7 @@ const StateEdit = ({ before, after, onChange }: StateEditProps): JSX.Element => 
         <div className="td pa2">Изменение</div>
         <div className="td pa2">После</div>
       </div>
-      <div className="tr">
+      <div className="tr mb-2">
         <Button variant="primary" className="mr2" onClick={handleCategoryAdd}>Добавить категорию</Button>
       </div>
       {(tableData.get('categorized') as BeforeAfterCategory[]).map(categoryData =>
@@ -315,107 +306,24 @@ const StateEdit = ({ before, after, onChange }: StateEditProps): JSX.Element => 
             </Button>
           </div>
           {categoryData.items.map(item =>
-            <div className="tr">
-              <div className="td pa2 pl4">
-                {item.isNew
-                ? <FormControl
-                    placeholder="Название"
-                    defaultValue={item.name} 
-                    required
-                    onChange={e => handleStateItemFieldChange(item, 'name', e)}
-                  />
-                : item.name}
-              </div>
-              <div className="td pa2">
-                {'before' in item ? `${item.before}${getCurrencySymbol(item.currency)}`: '-'}
-              </div>
-              <div className="td pa2">{getDifference(item)}</div>
-              <div className="td pa2">
-                {'after' in item
-                ? <div className="flex items-center">
-                    <div className="mr1">
-                      <FormControl
-                        placeholder="Сумма"
-                        type="numeric"
-                        defaultValue={item.after}
-                        required
-                        onChange={e => handleStateItemFieldChange(item, 'after', e)}
-                      />
-                    </div>
-                    {item.isNew
-                    ? <Form.Select
-                        defaultValue={item.currency}
-                        onChange={e => handleStateItemFieldChange(item, 'currency', e)}
-                        required
-                      >
-                        <option value="RUB">₽</option>
-                        <option value="USD">$</option>
-                        <option value="EUR">€</option>
-                      </Form.Select>
-                    : <span>{getCurrencySymbol(item.currency)}</span>
-                    }
-                  </div>
-                : 'удалено'
-                }
-              </div>
-            </div>
+            <StateItem
+              item={item}
+              categorized
+              onChange={handleItemChange}
+              onDelete={() => handleItemDelete(item)}
+              onRestore={() => handleItemRestore(item)}
+            />
           )}
           
         </>
       )}
       {(tableData.get('uncategorized') as BeforeAfter[]).map(item =>
-        <div className="tr">
-          <div className="td pa2">
-            {item.isNew
-            ? <FormControl
-                placeholder="Название"
-                defaultValue={item.name}
-                required
-                onChange={e => handleStateItemFieldChange(item, 'name', e)}
-              />
-            : item.name}
-          </div>
-          <div className="td pa2">{'before' in item ? `${item.before}${getCurrencySymbol(item.currency)}`: '-'}</div>
-          <div className="td pa2">{getDifference(item)}{getCurrencySymbol(item.currency)}</div>
-          <div className="td pa2">
-            {'after' in item
-            ? <div className="flex items-center">
-                <div className="mr1">
-                  <FormControl
-                    placeholder="Сумма"
-                    type="numeric"
-                    defaultValue={item.after}
-                    required
-                    onChange={e => handleStateItemFieldChange(item, 'after', e)}
-                  />
-                </div>
-                {item.isNew
-                ? <Form.Select
-                    defaultValue={item.currency}
-                    onChange={e => handleStateItemFieldChange(item, 'currency', e)}
-                    required
-                  >
-                    <option value="RUB">₽</option>
-                    <option value="USD">$</option>
-                    <option value="EUR">€</option>
-                  </Form.Select>
-                : <span>{getCurrencySymbol(item.currency)}</span>
-                }
-              </div>
-            : 'удалено'
-            }
-          </div>
-          <div className="td pa2">
-          {'after' in item
-            ? <div className="pointer" key="delete" onClick={() => handleItemDelete(item)}>
-              <i className="fas fa-times" />
-            </div>
-            : <div className="pointer" key="restore" onClick={() => handleItemRestore(item)}>
-              <i className="fas fa-undo" />
-            </div>
-          }
-          </div>
-        </div>
+        <StateItem
+          item={item}
+          onChange={handleItemChange}
+          onDelete={() => handleItemDelete(item)}
+          onRestore={() => handleItemRestore(item)}
+        />
       )}
       <div className="tr">
         <Button variant="primary" onClick={handleUncategorizedItemAdd}>Добавить расход</Button>
