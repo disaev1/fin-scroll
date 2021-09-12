@@ -20,6 +20,24 @@ body {
     text-align: center;
   }
 
+  &__navLink {
+    padding: .5rem;
+    display: block;
+    text-decoration: none;
+    color: white;
+    transition: .3s;
+
+    &:hover {
+      color: rgb(34, 43, 121);
+      background: white;
+    }
+  }
+
+  &__activeNavLink {
+    color: rgb(34, 43, 121);
+    background: white;
+  }
+
   &__logo {
     font-size: 2rem;
     padding: 1rem;
@@ -31,23 +49,11 @@ body {
     height: 100vh;
     display: flex;
   }
+
   &__leftPanel {
     width: 200px;
     background-color: rgb(34, 43, 121);
     height: 100%;
-
-    a {
-      padding: .5rem;
-      display: block;
-      text-decoration: none;
-      color: white;
-      transition: .3s;
-
-      &:hover {
-        color: rgb(34, 43, 121);
-        background: white;
-      }
-    }
   }
 
   &__content {

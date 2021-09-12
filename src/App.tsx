@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Switch, Route, Link, useHistory } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, NavLink, useHistory } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/js/all.js';
 
 import './App.scss';
@@ -38,24 +38,24 @@ const App = (): JSX.Element => {
         <div className="App__oneScreen">
           <div className="App__leftPanel">
             <div className="App__logo">Finance Scroll</div>
-            <Link to="/periods">
+            <NavLink to="/periods" className="App__navLink" activeClassName="App__activeNavLink">
               <div className="flex items-center">
                 <i className="fas fa-list fa-sm fa-fw mr1"></i>
                 <div>Периоды</div>
               </div>
-            </Link>
-            <Link to="/global-chart">
+            </NavLink>
+            <NavLink to="/global-chart" className="App__navLink"  activeClassName="App__activeNavLink">
               <div className="flex items-center">
                 <i className="fas fa-chart-line fa-sm fa-fw mr1"></i>
                 <div>График</div>
               </div>
-            </Link>
-            <Link to="/settings">
+            </NavLink>
+            <NavLink to="/settings" className="App__navLink"  activeClassName="App__activeNavLink">
               <div className="flex items-center">
                 <i className="fas fa-cogs fa-sm fa-fw mr1"></i>
                 <div>Настройки</div>
               </div>
-            </Link>
+            </NavLink>
           </div>
           <div className="App__content">
             <Switch>
