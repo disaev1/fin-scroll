@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Map } from 'immutable';
 
-import React, { useState, useEffect, useCallback, useRef, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 
 import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';

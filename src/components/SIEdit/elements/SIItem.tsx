@@ -29,11 +29,25 @@ const SIItem = ({ data, fixed, onChange, onDelete }: SIItemProps): JSX.Element =
   return (
     <div className="tr">
       <div className="td pa2">
-        <FormControl placeholder="Название" plaintext={fixed} defaultValue={data.name} required onChange={e => handleFieldChange('name', e)} />
+        <FormControl
+          placeholder="Название"
+          plaintext={fixed}
+          defaultValue={data.name}
+          required
+          onChange={e => handleFieldChange('name', e)}
+        />
       </div>
       <div className="td pa2">
         <div className="flex item-center">
-          <FormControl placeholder="Сумма" plaintext={fixed} type="numeric" className="text-end" defaultValue={data.value} required onChange={e => handleFieldChange('value', e)} />
+          <FormControl
+            placeholder="Сумма"
+            plaintext={fixed}
+            type="numeric"
+            className="text-end"
+            defaultValue={data.value}
+            required
+            onChange={e => handleFieldChange('value', e)}
+          />
           <div className="ms-2 flex items-center">{getCurrencySymbol(data.currency)}</div>
         </div>
       </div>

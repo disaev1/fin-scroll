@@ -80,7 +80,9 @@ const StateBarChart = ({ before, after }: StateBarChartProps): JSX.Element => {
       formatter: (params: TooltipParams[]) => {
         return params.reduce((acc, param) => {
           acc.innerHTML += `<div class="StateBarChart__tooltipItem">
-            <div class="td px-2"><div class="StateBarChart__tooltipCircle" style="background: ${param.color}"></div></div>
+            <div class="td px-2">
+              <div class="StateBarChart__tooltipCircle" style="background: ${param.color}"></div>
+            </div>
             <div class="td px-2">${param.seriesName}</div>
             <div class="td px-2 txt-ar">${param.data.absoluteValue}
             <div class="td px-2">${_.round(param.data.value, 2)}%</div>

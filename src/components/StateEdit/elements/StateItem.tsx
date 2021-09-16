@@ -1,9 +1,8 @@
 import _ from 'lodash';
 
-import React, { FormEvent, useState, useEffect, useMemo } from 'react';
+import React, { FormEvent, useState, useEffect } from 'react';
 
 import FormControl from 'react-bootstrap/FormControl';
-import Form from 'react-bootstrap/Form';
 
 import Difference from '~/components/Difference';
 
@@ -60,14 +59,18 @@ const StateItem = (props: StateItemProps): JSX.Element => {
           onChange={e => handleFieldChange(e, 'name')}
         />
       </div>
-      <div className="td pa2 txt-ar">{'before' in item ? `${item.before} ${getCurrencySymbol(item.currency)}`: '-'}</div>
+      <div className="td pa2 txt-ar">
+        {'before' in item ? `${item.before} ${getCurrencySymbol(item.currency)}`: '-'}
+      </div>
       <div className="td pa2 txt-ar"><Difference value={getDifference()} currency={'RUB'} /></div>
       <div className="td pa2">
         {'after' in item
         ? <div className="flex items-center justify-end">
             <div className="mr1">
               {fixed
-              ? <div className="td pa2 txt-ar">{'after' in item ? `${item.after} ${getCurrencySymbol(item.currency)}`: '-'}</div>
+              ? <div className="td pa2 txt-ar">
+                  {'after' in item ? `${item.after} ${getCurrencySymbol(item.currency)}`: '-'}
+                </div>
               : <FormControl
                   placeholder="Сумма"
                   type="numeric"

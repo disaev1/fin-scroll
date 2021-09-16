@@ -1,9 +1,7 @@
-import axios from 'axios';
-
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { apiRoot, noop } from '../utils/constants';
+import { noop } from '../utils/constants';
 
 import Button from 'react-bootstrap/Button';
 import Accordion from 'react-bootstrap/Accordion';
@@ -19,16 +17,6 @@ interface PeriodsPageProps {
 
 const PeriodsPage = ({ periods, onPeriodAdd }: PeriodsPageProps): JSX.Element => {
   const history = useHistory();
-
-  const handleAddFirstPeriod = async () => {
-    const { data } = await axios.post(`${apiRoot}/periods`, {
-      spendings: [], incomes: [], after: { items: [], date: '' }, before: { items: [], date: '' }
-    });
-
-    const firstPeriod: Period = data as Period;
-
-    onPeriodAdd(firstPeriod);
-  };
 
   const handleAddPeriod = async () => {
     const newPeriod: Period = await PeriodsApi.add(periods);

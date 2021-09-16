@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import React, { useMemo, useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import React, { useMemo, useState, useEffect, ChangeEvent } from 'react';
 
 import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
@@ -96,42 +96,12 @@ const SIEdit = ({ data, fixed, onChange, theme }: SIEditProps): JSX.Element => {
         ),
       );
     } else {
-      const targetIndex = uncategorizedSpendings.findIndex(item => item.category === newItem.category && item.name === newItem.name);
+      const targetIndex =
+        uncategorizedSpendings.findIndex(item => item.category === newItem.category && item.name === newItem.name);
+
       setUncategorizedSpengings(uncategorizedSpendings.set(targetIndex, newItem));
     }
   };
-
-  // const handleSpendingFieldChange = (spending: Spending, field: string, e: FormEvent): void => {
-  //   let newValue: string | number = (e.target as HTMLSelectElement | HTMLInputElement).value;
-
-  //   if (field === 'value') {
-  //     newValue = Number(newValue);
-  //   }
-
-
-  //   if (spending.category) {
-  //     const targetCategoryIndex = categorizedSpendings.findIndex(item => item.category === spending.category);
-
-  //     setCategorizedSpengings(
-  //       categorizedSpendings.set(
-  //         targetCategoryIndex,
-  //         { 
-  //           ...categorizedSpendings.get(targetCategoryIndex),
-  //           items: categorizedSpendings.get(targetCategoryIndex).items.map(item => {
-  //             if (item.id === spending.id) {
-  //               return { ...spending, [field]: newValue }
-  //             }
-
-  //             return item;
-  //           })
-  //         },
-  //       ),
-  //     );
-  //   } else {
-  //     const targetIndex = uncategorizedSpendings.findIndex(item => item.category === spending.category && item.name === spending.name);
-  //     setUncategorizedSpengings(uncategorizedSpendings.set(targetIndex, { ...spending, [field]: newValue }));
-  //   }
-  // };
   
   const handleCategoryAdd = () => {
     setCategorizedSpengings(categorizedSpendings.unshift({ category: '', items: [], id: generateId() }));
@@ -207,11 +177,18 @@ const SIEdit = ({ data, fixed, onChange, theme }: SIEditProps): JSX.Element => {
       <div className="flex-auto">
         {categorizedSpendings.map(item =>
           <div key={item.id}>
-            <FormControl placeholder="Категория" plaintext={fixed} defaultValue={item.category} onChange={e => handleCategoryNameChange(item, e)} />
+            <FormControl
+              placeholder="Категория"
+              plaintext={fixed}
+              defaultValue={item.category}
+              onChange={e => handleCategoryNameChange(item, e)}
+            />
             <div className="Spendings__categorizedSpendings">
               {!fixed
                 && <div className="pa2">
-                  <Button variant={theme} size="sm" onClick={() => handleCategorizedItemAdd(item.category)}>Добавить элемент</Button>
+                  <Button variant={theme} size="sm" onClick={() => handleCategorizedItemAdd(item.category)}>
+                    Добавить элемент
+                  </Button>
                 </div>
               }
               {item.items.map(spending =>
