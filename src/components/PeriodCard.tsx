@@ -8,6 +8,7 @@ import Accordion from 'react-bootstrap/Accordion';
 import Difference from '~/components/Difference';
 import { Period } from '../pages/PeriodsPage.d';
 import { getTotalOperations } from './Spendings.utils';
+import { Settings } from '~/types.d';
 
 import './PeriodCard.scss';
 import { getCurrencySymbol } from '~/utils/helpers';
@@ -16,6 +17,7 @@ import { errorThreshold } from '~/utils/constants';
 interface PeriodProps {
   period: Period;
   index: number;
+  settings: Settings;
   onEditButtonClick?: (period: Period) => void;
 }
 
@@ -27,7 +29,7 @@ const formatDate = (dateStr: string) => {
   return moment.utc(dateStr).format('DD.MM.YYYY');
 };
 
-const PeriodCard = ({ period, index, onEditButtonClick }: PeriodProps): JSX.Element => {
+const PeriodCard = ({ period, index, settings, onEditButtonClick }: PeriodProps): JSX.Element => {
   const handleEditButtonClick = () => {
     onEditButtonClick(period);
   }
@@ -44,7 +46,7 @@ const PeriodCard = ({ period, index, onEditButtonClick }: PeriodProps): JSX.Elem
     <Accordion.Item eventKey={`${index}`}>
       <Accordion.Header>
         <div className="flex items-center">
-          {Math.abs(stateDelta - sIDelta) > errorThreshold
+          {Math.abs(stateDelta - sIDelta) > settings.errorThreshold
             ? <i className="fas fa-exclamation-triangle text-warning me-2" />
             : <i className="fa-fw me-2" />
           }
@@ -80,7 +82,7 @@ const PeriodCard = ({ period, index, onEditButtonClick }: PeriodProps): JSX.Elem
                 <div className="td px-2">Изменение</div>
                 <div className="td px-2 text-end"><Difference value={sIDelta} currency={'RUB'} /></div>
               </div>
-              {Math.abs(stateDelta - sIDelta) > errorThreshold
+              {Math.abs(stateDelta - sIDelta) > settings.errorThreshold
                 && <div className="flex items-center ps-2">
                   <i className="fas fa-exclamation-triangle fa-sm me-2 text-warning" />
                   <div>

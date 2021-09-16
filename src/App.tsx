@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import React, { useState, useCallback } from 'react';
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route, NavLink, useHistory } from 'react-router-dom';
@@ -9,8 +11,11 @@ import PeriodsPage from './pages/PeriodsPage';
 import PeriodEditPage from './pages/PeriodEditPage';
 import PeriodsApi from '~/PeriodsApi';
 import GlobalChartPage from '~/pages/GlobalChartPage';
+import SettingsPage from '~/pages/SettingsPage';
+import { apiRoot } from '~/utils/constants';
 
 import { Period } from './pages/PeriodsPage.d';
+import { Settings } from './types.d';
 
 const AppWrapper = (): JSX.Element => {
   return (
@@ -22,12 +27,16 @@ const AppWrapper = (): JSX.Element => {
 
 const App = (): JSX.Element => {
   const [periods, setPeriods] = useState<Period[]>([]);
+  const [settings, setSettings] = useState<Settings>({ errorThreshold: 100 });
   const [loaded, setLoaded] = useState<boolean>(false);
   const [periodEditPageInitialFixed, setPeriodEditPageInitialFixed] = useState<boolean>(true);
   const history = useHistory();
 
-
   const getPeriods = useCallback(async () => {
+    const { data } = await axios.get(`${apiRoot}/settings`);
+
+    setSettings(data as Settings);
+
     const periods = await PeriodsApi.getPeriods();
 
     setPeriods(periods);
@@ -82,11 +91,14 @@ const App = (): JSX.Element => {
               <Route path="/global-chart" exact>
                 <GlobalChartPage periods={periods} />
               </Route>
+              <Route path="/settings" exact>
+                <SettingsPage settings={settings} onSave={handlePeriodSaved} />
+              </Route>
               <Route path="/periods/:id" exact>
                 <PeriodEditPage periods={periods} onSave={handlePeriodSaved} initialFixed={periodEditPageInitialFixed}/>
               </Route>
               <Route path="/periods">
-                <PeriodsPage periods={periods} onPeriodAdd={handlePeriodAdd} />
+                <PeriodsPage periods={periods} settings={settings} onPeriodAdd={handlePeriodAdd} />
               </Route>
             </Switch>
           </div>

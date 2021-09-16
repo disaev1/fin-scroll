@@ -6,4 +6,8 @@ interface Entity {
   currency: string;
 }
 
-export { Entity };
+interface Settings {
+  errorThreshold: number;
+}
+
+export { Entity, Settings };

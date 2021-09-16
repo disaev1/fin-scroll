@@ -9,13 +9,15 @@ import Accordion from 'react-bootstrap/Accordion';
 import { Period } from './PeriodsPage.d';
 import PeriodCard from '../components/PeriodCard';
 import PeriodsApi from '~/PeriodsApi';
+import { Settings } from '~/types.d';
 
 interface PeriodsPageProps {
   periods: Period[];
+  settings: Settings;
   onPeriodAdd?: (period: Period) => void;
 }
 
-const PeriodsPage = ({ periods, onPeriodAdd }: PeriodsPageProps): JSX.Element => {
+const PeriodsPage = ({ periods, settings, onPeriodAdd }: PeriodsPageProps): JSX.Element => {
   const history = useHistory();
 
   const handleAddPeriod = async () => {
@@ -58,7 +60,13 @@ const PeriodsPage = ({ periods, onPeriodAdd }: PeriodsPageProps): JSX.Element =>
       </div>
       <Accordion>
         {periods.map((period, index) =>
-          <PeriodCard key={period._id} period={period} index={index} onEditButtonClick={handlePeriodEdit} />
+          <PeriodCard
+            key={period._id}
+            period={period} 
+            index={index}
+            settings={settings}
+            onEditButtonClick={handlePeriodEdit}
+          />
         )}
       </Accordion>
     </div>
