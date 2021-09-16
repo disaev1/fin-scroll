@@ -2,10 +2,10 @@ import _ from 'lodash';
 
 import React, { useMemo } from 'react';
 
+import Difference from '~/components/Difference';
 import { Spending } from './Spendings.d';
 import { getTotalOperations } from './Spendings.utils';
-import { currencies } from '../utils/constants';
-import { getCurrencySymbol } from '../utils/helpers';
+import { currencies } from '~/utils/constants';
 
 interface SIDifferenceProps {
   spendings: Spending[];
@@ -35,10 +35,9 @@ const SIDifference = ({ spendings, incomes }: SIDifferenceProps): JSX.Element =>
 
   return (
     <div>
-      {diffs.map((item, index) =>
+      {diffs.map(item =>
         <div className="tr" key={item.currency}>
-          <div className="td b pa2">{index === 0 ? 'Всего' : ''}</div>
-          <div className="td pa2">{item.value} {getCurrencySymbol(item.currency)}</div>
+          <div className="td pa2"><Difference value={item.value} currency={item.currency} /></div>
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route, NavLink, useHistory } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/js/all.js';
@@ -7,6 +7,8 @@ import './App.scss';
 
 import PeriodsPage from './pages/PeriodsPage';
 import PeriodEditPage from './pages/PeriodEditPage';
+import PeriodsApi from '~/PeriodsApi';
+import GlobalChartPage from '~/pages/GlobalChartPage';
 
 import { Period } from './pages/PeriodsPage.d';
 
@@ -19,23 +21,41 @@ const AppWrapper = (): JSX.Element => {
 }
 
 const App = (): JSX.Element => {
-  const [editedPeriod, setEditedPeriod] = useState<Period>(null);
+  const [periods, setPeriods] = useState<Period[]>([]);
+  const [loaded, setLoaded] = useState<boolean>(false);
+  const [periodEditPageInitialFixed, setPeriodEditPageInitialFixed] = useState<boolean>(true);
   const history = useHistory();
-  console.log('history is', history);
 
 
-  const handlePeriodEdit = (period: Period): void => {
-    setEditedPeriod(period);
-    history.push('/periods/one');
-  };
+  const getPeriods = useCallback(async () => {
+    const periods = await PeriodsApi.getPeriods();
+
+    setPeriods(periods);
+    setLoaded(true);
+  }, []);
 
   useEffect(() => {
-    console.log('editedPeriod changed to', editedPeriod);
-  }, [editedPeriod]);
+    getPeriods();
+  }, [getPeriods]);
+
+  const handlePeriodSaved = () => {
+    setPeriodEditPageInitialFixed(true);
+    setLoaded(false);
+    getPeriods();
+  };
+
+  const handlePeriodAdd = async (period: Period) => {
+    setLoaded(false);
+
+    await getPeriods();
+
+    setPeriodEditPageInitialFixed(false);
+    history.push(`/periods/${period._id}`);
+  };
 
   return (
     <div className="App">
-        <div className="App__oneScreen">
+        {loaded && <div className="App__oneScreen">
           <div className="App__leftPanel">
             <div className="App__logo">Finance Scroll</div>
             <NavLink to="/periods" className="App__navLink" activeClassName="App__activeNavLink">
@@ -59,15 +79,18 @@ const App = (): JSX.Element => {
           </div>
           <div className="App__content">
             <Switch>
-              <Route path="/periods/one" exact>
-                <PeriodEditPage period={editedPeriod} />
+              <Route path="/global-chart" exact>
+                <GlobalChartPage periods={periods} />
+              </Route>
+              <Route path="/periods/:id" exact>
+                <PeriodEditPage periods={periods} onSave={handlePeriodSaved} initialFixed={periodEditPageInitialFixed}/>
               </Route>
               <Route path="/periods">
-                <PeriodsPage onPeriodEdit={handlePeriodEdit} />
+                <PeriodsPage periods={periods} onPeriodAdd={handlePeriodAdd} />
               </Route>
             </Switch>
           </div>
-        </div>
+        </div>}
     </div>
   ); 
 };

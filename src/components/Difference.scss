@@ -1,0 +1,11 @@
+@import '~/vars.scss';
+
+.Difference {
+  &__positive {
+    color: $success;
+  }
+
+  &__negative {
+    color: $danger;
+  }
+}

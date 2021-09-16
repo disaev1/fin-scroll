@@ -30,6 +30,8 @@
     "config": "^3.3.6",
     "config-webpack": "^1.0.5",
     "css-loader": "^6.2.0",
+    "echarts": "^5.2.0",
+    "echarts-for-react": "^3.0.1",
     "immutable": "^4.0.0-rc.14",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",

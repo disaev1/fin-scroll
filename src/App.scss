@@ -109,12 +109,30 @@ body {
   display: flex;
 }
 
+.flex-auto {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
 .items-center {
   align-items: center;
 }
 
+.justify-end {
+  justify-content: flex-end;
+}
+
 .justify-center {
   justify-content: center;
+}
+
+.as-table {
+  display: table;
+}
+
+.txt-ar {
+  text-align: right;
 }
 
 .tr {

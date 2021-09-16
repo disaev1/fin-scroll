@@ -1,0 +1,13 @@
+.StateBarChart {
+  &__tooltipCircle {
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    display: table-cell;
+    margin-right: .5rem;
+  }
+
+  &__tooltipItem {
+    display: table-row;
+  }
+}

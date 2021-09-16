@@ -1,0 +1,31 @@
+@import '~/vars.scss';
+
+.PeriodCard {
+  display: flex;
+  line-height: 2.5;
+
+  &__spendings {
+    color: $danger;
+  }
+
+  &__incomes {
+    color: $success;
+  }
+
+  &__state {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+  }
+
+  &__ellipsis {
+    color: gray;
+    transition: .3s;
+    cursor: pointer;
+    margin-left: auto;
+
+    &:hover {
+      color: black;
+    }
+  }
+}

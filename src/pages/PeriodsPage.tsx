@@ -1,70 +1,84 @@
 import axios from 'axios';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 
-import { apiRoot } from '../utils/constants';
+import { apiRoot, noop } from '../utils/constants';
 
 import Button from 'react-bootstrap/Button';
 import Accordion from 'react-bootstrap/Accordion';
 
 import { Period } from './PeriodsPage.d';
 import PeriodCard from '../components/PeriodCard';
+import PeriodsApi from '~/PeriodsApi';
 
-interface PeriodPageProps {
-  onPeriodEdit: (period: Period) => void;
+interface PeriodsPageProps {
+  periods: Period[];
+  onPeriodAdd?: (period: Period) => void;
 }
 
-const PeriodsPage = ({ onPeriodEdit }: PeriodPageProps): JSX.Element => {
-  const [periods, setPeriods] = useState<Period[]>([]);
-  const [loaded, setLoaded] = useState<boolean>(false);
-
-  const getPeriods = async () => {
-    const { data } = await axios.get('http://localhost:4000/periods');
-    
-    setPeriods(data);
-    setLoaded(true);
-  };
-
-  useEffect(() => {
-    getPeriods();
-  }, []);
+const PeriodsPage = ({ periods, onPeriodAdd }: PeriodsPageProps): JSX.Element => {
+  const history = useHistory();
 
   const handleAddFirstPeriod = async () => {
     const { data } = await axios.post(`${apiRoot}/periods`, {
-      spendings: [], incomes: [], after: { items: [], date: '' }
+      spendings: [], incomes: [], after: { items: [], date: '' }, before: { items: [], date: '' }
     });
+
     const firstPeriod: Period = data as Period;
 
-    onPeriodEdit(firstPeriod);
+    onPeriodAdd(firstPeriod);
   };
 
   const handleAddPeriod = async () => {
-    const { data } = await axios.post(`${apiRoot}/periods`, {
-      spendings: [], incomes: [], after: { items: [], date: '' }
-    });
-    console.log('handleAddPeriod', data);
+    const newPeriod: Period = await PeriodsApi.add(periods);
 
-    onPeriodEdit(data as Period);
+    onPeriodAdd(newPeriod);
   }
+
+  const handlePeriodEdit = (period: Period): void => {
+    history.push(`/periods/${period._id}`);
+  };
+
+  const unfinished = useMemo(() => {
+    const lastPeriod = PeriodsApi.getLast(periods);
+
+    if (!lastPeriod) {
+      return '';
+    }
+
+    if (!lastPeriod.after.date) {
+      return 'Задайте дату завершения последнего периода.'
+    }
+
+    return '';
+  }, [periods]);
 
   return (
     <div className="Periods">
       <h2 className="tc mb3">Периоды</h2>
-      {loaded
-      ? <>
-          <div className="mb2">
-            {!periods.length
-            ? <Button variant="success" onClick={handleAddFirstPeriod}>Добавить первый период</Button>
-            : <Button variant="success" onClick={handleAddPeriod}>Добавить период</Button>
-            }
-          </div>
-          <Accordion>
-            {periods.map((period, index) => <PeriodCard period={period} index={index} />)}
-          </Accordion>
-        </>
-      : null}
+      <div className="mb2 flex items-center">
+        <Button
+          disabled={Boolean(unfinished)}
+          className="me-2"
+          variant="success"
+          onClick={handleAddPeriod}
+        >
+          Добавить период
+        </Button>
+        {unfinished && <div>{unfinished}</div>}
+      </div>
+      <Accordion>
+        {periods.map((period, index) =>
+          <PeriodCard key={period._id} period={period} index={index} onEditButtonClick={handlePeriodEdit} />
+        )}
+      </Accordion>
     </div>
   );
+};
+
+PeriodsPage.defaultProps = {
+  onPeriodAdd: noop,
 };
 
 export default PeriodsPage;
