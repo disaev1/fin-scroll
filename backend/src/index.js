@@ -10,10 +10,17 @@ const schema = new mongoose.Schema({
   incomes: Array,
   after: Object,
   before: { type: Object, required: false },
-  previous: mongoose.ObjectId
+  previous: mongoose.ObjectId,
+});
+
+const settingsSchema = new mongoose.Schema({
+  errorThreshold: Number,
+  defaultCurrency: String,
+  theme: String,
 });
 
 const PeriodModel = mongoose.model('periods', schema);
+const SettingsModel = mongoose.model('settings', settingsSchema);
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -26,6 +33,20 @@ app.use((__, res, next) => {
 
 app.get('/', (req, res) => {
   res.send('Root OK!');
+});
+
+app.get('/settings', async (__, res) => {
+  const settingsDocs = await SettingsModel.find();
+
+  res.send(_.get(settingsDocs, '0', {}));
+});
+
+app.patch('/settings', async (req, res) => {
+  const settingsDocs = await SettingsModel.find();
+
+  const result = await SettingsModel.updateOne({ _id: settingsDocs[0]._id.toString() }, req.body);
+
+  res.send(_.pick(result, ['n', 'nModified']));
 });
 
 app.get('/periods', async (__, res) => {
