@@ -12,7 +12,6 @@ import { Settings } from '~/types.d';
 
 import './PeriodCard.scss';
 import { getCurrencySymbol } from '~/utils/helpers';
-import { errorThreshold } from '~/utils/constants';
 
 interface PeriodProps {
   period: Period;
