@@ -1,7 +1,13 @@
 # Local deployment
 ```
 yarn install
+```
+Launch frontend
+```
 yarn dev
+```
+Launch backend
+```
 nodemon ./server.js
 ```
 
