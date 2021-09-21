@@ -1,11 +1,11 @@
 import _ from 'lodash';
 
-import { Spending } from './Spendings.d';
+import { Entity } from '~/types.d';
 import { currencies } from '../utils/constants';
 
-const getTotalOperations = (operations: Spending[]): Spending[] => {
+const getTotalOperations = (operations: Entity[]): Entity[] => {
   const groupedByCurrency = _.groupBy(operations, 'currency');
-  const result: Spending[] = [];
+  const result: Entity[] = [];
 
   currencies.map(currency => {
     if (groupedByCurrency[currency]) {

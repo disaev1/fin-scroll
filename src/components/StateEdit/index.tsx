@@ -11,17 +11,17 @@ import Difference from '~/components/Difference';
 import { generateId, getCurrencySymbol } from '~/utils/helpers';
 import { defaultCurrency } from '~/utils/constants';
 
-import { Spending } from '../Spendings.d';
+import { Entity } from '~/types.d';
 import { BeforeAfter } from './index.d';
 import { getTotalOperations } from '~/components/Spendings.utils';
 
 import StateItem from './elements/StateItem';
 
 interface StateEditProps {
-  before: Spending[];
-  after: Spending[];
+  before: Entity[];
+  after: Entity[];
   fixed: boolean;
-  onChange?: (value: { before: Spending[], after: Spending[] }) => void;
+  onChange?: (value: { before: Entity[], after: Entity[] }) => void;
 }
 
 interface BeforeAfterCategory {
@@ -39,7 +39,7 @@ const StateEdit = ({ before, after, fixed, onChange }: StateEditProps): JSX.Elem
     const categorized: BeforeAfterCategory[]  = [];
     const uncategorized: BeforeAfter[] = [];
 
-    const processState = (state: Spending[], type: 'before' | 'after'): void => {
+    const processState = (state: Entity[], type: 'before' | 'after'): void => {
       state.forEach(item => {
         if (item.category) {
           let targetCategory = categorized.find(catItem => catItem.category === item.category);
@@ -234,20 +234,20 @@ const StateEdit = ({ before, after, fixed, onChange }: StateEditProps): JSX.Elem
     }
   }
 
-  const getCurrentState = (): { before: Spending[], after: Spending[] } => {
+  const getCurrentState = (): { before: Entity[], after: Entity[] } => {
     const categorized = currentData.get('categorized') as BeforeAfterCategory[];
     const uncategorized = currentData.get('uncategorized') as BeforeAfter[];
-    const result: { before: Spending[], after: Spending[] } = { before: [], after: [] };
+    const result: { before: Entity[], after: Entity[] } = { before: [], after: [] };
 
     const itemReducer = (item: BeforeAfter) => {
       const auxFields = ['before', 'after', 'id', 'isNew'];
 
       if ('before' in item) {
-        result.before.push({ ...(_.omit(item, auxFields) as Spending), value: item.before });
+        result.before.push({ ...(_.omit(item, auxFields) as Entity), value: item.before });
       }
 
       if ('after' in item) {
-        result.after.push({ ...(_.omit(item, auxFields) as Spending), value: item.after });
+        result.after.push({ ...(_.omit(item, auxFields) as Entity), value: item.after });
       }
     }
 
@@ -278,7 +278,8 @@ const StateEdit = ({ before, after, fixed, onChange }: StateEditProps): JSX.Elem
         <div className="td pa2 txt-ar">После</div>
       </div>
       {!fixed && <div className="tr mb-2">
-        <Button size="sm" variant="primary" className="mr2" onClick={handleCategoryAdd}>Добавить категорию</Button>
+        <Button size="sm" variant="primary" className="mr1" onClick={handleCategoryAdd}>Добавить категорию</Button>
+        <Button size="sm" variant="primary" onClick={handleUncategorizedItemAdd}>Добавить элемент</Button>
       </div>}
       {(currentData.get('categorized') as BeforeAfterCategory[]).map(categoryData =>
         <>
@@ -319,9 +320,6 @@ const StateEdit = ({ before, after, fixed, onChange }: StateEditProps): JSX.Elem
           onRestore={() => handleItemRestore(item)}
         />
       )}
-      {!fixed && <div className="tr">
-        <Button size="sm" variant="primary" onClick={handleUncategorizedItemAdd}>Добавить элемент</Button>
-      </div>}
       <div className="tr">
         <div className="td pa2 b">Всего</div>
         <div className="td pa2 text-end">{totalBefore} {getCurrencySymbol('RUB')}</div>

@@ -1,4 +1,5 @@
 import moment from 'moment';
+import _ from 'lodash';
 
 import React, { useState, useCallback, useMemo, ChangeEvent } from 'react';
 import { useParams } from 'react-router-dom';
@@ -6,15 +7,17 @@ import { useParams } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 
 import { Period, PeriodPatch } from './PeriodsPage.d';
-import { Spending } from '~/components/Spendings.d';
-import { Entity } from '~/types.d';
+import { Entity, Settings } from '~/types.d';
 
 import SIEdit from '~/components/SIEdit';
 import SIDifference from '~/components/SIDifference';
 import StateEdit from '~/components/StateEdit';
 import StateBarChart from '~/components/StateBarChart';
+import Difference from '~/components/Difference';
 
 import { noop } from '../utils/constants';
+import { getTotalOperations } from '~/components/Spendings.utils';
+
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -31,14 +34,13 @@ interface PeriodEditPageParams {
 interface PeriodEditPageProps {
   periods: Period[];
   initialFixed?: boolean;
+  settings: Settings;
   onSave?: () => void;
 }
 
-const PeriodEditPage = ({ periods, initialFixed, onSave }: PeriodEditPageProps): JSX.Element => {
+const PeriodEditPage = ({ periods, initialFixed, settings, onSave }: PeriodEditPageProps): JSX.Element => {
   const [spendings, setSpendings] = useState([]);
   const [incomes, setIncomes] = useState([]);
-  const [beforeDate, setBeforeDate] = useState('');
-  const [afterDate, setAfterDate] = useState('');
   const [after, setAfter] = useState([]);
   const [fixed, setFixed] = useState<boolean>(initialFixed);
   const { id } = useParams<PeriodEditPageParams>();
@@ -49,21 +51,24 @@ const PeriodEditPage = ({ periods, initialFixed, onSave }: PeriodEditPageProps):
     return res;
   }, [periods, id]);
 
+  const [beforeDate, setBeforeDate] = useState(period.before.date);
+  const [afterDate, setAfterDate] = useState(period.after.date);
+
   const isLast = useMemo(() => {
     const lastPeriod = PeriodsApi.getLast(periods);
 
     return lastPeriod._id === id;
   }, [periods, id]);
   
-  const handleSpendingsChange = (value: Spending[]) => {
+  const handleSpendingsChange = (value: Entity[]) => {
     setSpendings(value);
   }
 
-  const handleIncomesChange = useCallback((value: Spending[]) => {
+  const handleIncomesChange = useCallback((value: Entity[]) => {
     setIncomes(value);
   }, []);
 
-  const handleStateChange = useCallback((value: { before: Spending[], after: Spending[] }) => {
+  const handleStateChange = useCallback((value: { before: Entity[], after: Entity[] }) => {
     setAfter(value.after);
   }, []);
 
@@ -97,6 +102,13 @@ const PeriodEditPage = ({ periods, initialFixed, onSave }: PeriodEditPageProps):
   }, []);
 
   const getNextDayDate = (date: string) => moment.utc(date).add(1, 'days').format('YYYY-MM-DD');
+
+  const totalBefore = _.get(getTotalOperations(period.before.items), '0.value', 0);
+  const totalAfter = _.get(getTotalOperations(after), '0.value', 0);
+  const totalSpendings = _.get(getTotalOperations(spendings), '0.value', 0);
+  const totalIncomes = _.get(getTotalOperations(incomes), '0.value', 0);
+  const sIDelta = totalIncomes - totalSpendings;
+  const stateDelta = totalAfter - totalBefore;
 
   return (
     <>
@@ -164,6 +176,20 @@ const PeriodEditPage = ({ periods, initialFixed, onSave }: PeriodEditPageProps):
               </Col>
               <Col xs lg="3" />
             </Row>
+            {Math.abs(stateDelta - sIDelta) > settings.errorThreshold
+                && <Row>
+                    <Col>
+                      <div className="flex items-center ps-2">
+                      <i className="fas fa-exclamation-triangle fa-sm me-2 text-warning" />
+                      <div>
+                        <span>Изменение состояния не совпадает с разницей доходов и расходов (различие </span>
+                        <Difference value={stateDelta - sIDelta} currency={'RUB'}/>
+                        <span>). Возможно, не учтена какая-либо статья дохода/расхода.</span>
+                      </div>
+                    </div>
+                    </Col>
+                </Row>
+              }
             <Row className="mb-3">
               <Col xs lg="2" />
               <Col>

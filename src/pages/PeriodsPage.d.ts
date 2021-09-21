@@ -1,13 +1,13 @@
-import { Spending } from '../components/Spendings.d';
+import { Entity } from '~/types.d';
 
 interface State {
-  items: Spending[],
+  items: Entity[],
   date: string;
 }
 
 interface PeriodBase {
-  spendings: Spending[],
-  incomes: Spending[],
+  spendings: Entity[],
+  incomes: Entity[],
   after: State;
   previous: string;
 }

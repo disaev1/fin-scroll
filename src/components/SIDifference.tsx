@@ -3,20 +3,20 @@ import _ from 'lodash';
 import React, { useMemo } from 'react';
 
 import Difference from '~/components/Difference';
-import { Spending } from './Spendings.d';
+import { Entity } from '~/types.d';
 import { getTotalOperations } from './Spendings.utils';
 import { currencies } from '~/utils/constants';
 
 interface SIDifferenceProps {
-  spendings: Spending[];
-  incomes: Spending[];
+  spendings: Entity[];
+  incomes: Entity[];
 }
 
 const SIDifference = ({ spendings, incomes }: SIDifferenceProps): JSX.Element => {
-  const diffs = useMemo<Spending[]>(() => {
+  const diffs = useMemo<Entity[]>(() => {
     const totalSpendings = getTotalOperations(spendings);
     const totalIncomes = getTotalOperations(incomes);
-    const result: Spending[] = [];
+    const result: Entity[] = [];
 
     currencies.map(currency => {
       const targetIncome = totalIncomes.find(item => item.currency === currency);

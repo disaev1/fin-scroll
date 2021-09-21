@@ -6,10 +6,9 @@ import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
 import { List } from 'immutable';
 
-import { Spending } from '../Spendings.d';
 import { Entity } from '~/types.d';
 import { generateId, getCurrencySymbol } from '../../utils/helpers';
-import { defaultCurrency } from '../../utils/constants';
+import { defaultCurrency, noop } from '../../utils/constants';
 import { getTotalOperations } from '../Spendings.utils';
 import SIItem from './elements/SIItem';
 
@@ -18,19 +17,19 @@ import './index.scss';
 interface SpendingCategory {
   id?: string;
   category: string;
-  items: Spending[];
+  items: Entity[];
 }
 
 interface SIEditProps {
-  data: Spending[];
+  data: Entity[];
   theme?: string;
   fixed?: boolean;
-  onChange?: (value: Spending[]) => void;
+  onChange?: (value: Entity[]) => void;
 }
 
 const SIEdit = ({ data, fixed, onChange, theme }: SIEditProps): JSX.Element => {
   const [categorizedSpendings, setCategorizedSpengings] = useState<List<SpendingCategory>>(List([]));
-  const [uncategorizedSpendings, setUncategorizedSpengings] = useState<List<Spending>>(List([]));
+  const [uncategorizedSpendings, setUncategorizedSpengings] = useState<List<Entity>>(List([]));
 
 
   useEffect(() => {
@@ -55,7 +54,7 @@ const SIEdit = ({ data, fixed, onChange, theme }: SIEditProps): JSX.Element => {
 
 
   const currentSpendings = useMemo(() => {
-    const flattenedCategorized = categorizedSpendings.reduce((acc: Spending[], categoryData: SpendingCategory) => {
+    const flattenedCategorized = categorizedSpendings.reduce((acc: Entity[], categoryData: SpendingCategory) => {
       acc = acc.concat(categoryData.items.map(item => _.omit(item, 'id')));
 
       return acc;
@@ -76,7 +75,7 @@ const SIEdit = ({ data, fixed, onChange, theme }: SIEditProps): JSX.Element => {
     onChange(currentSpendings);
   }, [uncategorizedSpendings, currentSpendings, onChange]);
 
-  const handleItemChange = (newItem: Spending): void => {
+  const handleItemChange = (newItem: Entity): void => {
     if (newItem.category) {
       const targetCategoryIndex = categorizedSpendings.findIndex(item => item.category === newItem.category);
 
@@ -131,7 +130,7 @@ const SIEdit = ({ data, fixed, onChange, theme }: SIEditProps): JSX.Element => {
     );
   }
 
-  const handleSpendingDelete = (spending: Spending) => {
+  const handleSpendingDelete = (spending: Entity) => {
     if (spending.category) {
       const targetCategoryIndex = categorizedSpendings.findIndex(item => item.category === spending.category);
 
@@ -226,6 +225,7 @@ const SIEdit = ({ data, fixed, onChange, theme }: SIEditProps): JSX.Element => {
 SIEdit.defaultProps = {
   theme: 'danger',
   fixed: false,
+  onChange: noop,
 };
 
 export default SIEdit;
